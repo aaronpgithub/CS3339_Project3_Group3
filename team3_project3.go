@@ -629,6 +629,8 @@ func runSimulation(outputFile string, c Control, il []Instruction) Control {
 		log.Fatalf("Error opening output file. err: %s", errOut)
 	}
 
+	c.writeBack(&bufPostMem, &bufPostALU)
+
 	var runControlLoop = true
 	var outputString, concatString string
 	var cycleNumber = 1

@@ -3,7 +3,7 @@ package main
 // queue dtype holds a dynamically sized slice of any type of data.
 // Queue is First in, First out. (FIFO)
 type Queue struct {
-	data    []interface{}
+	data    [][]interface{}
 	maxSize int
 }
 
@@ -17,7 +17,7 @@ func initQueue(maxSize int) Queue {
 // append new value to queue if not full
 //
 //	returns queue and error value, 0 if ok, 1 if cannot insert data because queue is full.
-func (q Queue) enqueue(data interface{}) (Queue, int) {
+func (q *Queue) enqueue(data []interface{}) int {
 	var err = 0
 
 	if q.maxSize > len(q.data) {
@@ -26,14 +26,26 @@ func (q Queue) enqueue(data interface{}) (Queue, int) {
 		err = 1
 	}
 
-	return q, err
+	return err
 }
 
 // returns queue, dequeued value and error value, 0 if ok, 1 if cannot delete data
-func (q Queue) dequeue() (Queue, interface{}, int) {
+func (q *Queue) dequeue() ([]interface{}, int) {
 	var err = 0
-	var value = q.data[0]
+	if !(q.isEmpty()) {
+		var value = q.data[0]
 
-	q.data = q.data[1:] // Slice off the element once it is dequeued.
-	return q, value, err
+		q.data = q.data[1:] // Slice off the element once it is dequeued.
+		return value, err
+	} else {
+		return nil, -1
+	}
+}
+
+func (q *Queue) isEmpty() bool {
+	if cap(q.data) == 0 {
+		return true
+	} else {
+		return false
+	}
 }
