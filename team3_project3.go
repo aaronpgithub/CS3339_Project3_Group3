@@ -79,7 +79,7 @@ func main() {
 
 	writeOutputFile(oFlag, instructionList)
 
-	control = runSimulation(oSim, control, instructionList)
+	runSimulation(oSim, &control, instructionList)
 }
 
 // ***** Function Definitions *****//
@@ -528,9 +528,10 @@ func trimFirstRune(s string) string {
 	return s[i:]
 }
 
-func (c Control) runInstruction(i Instruction) Control {
+func (c *Control) runInstruction(i Instruction) int64 {
 
 	var branchOperation = false
+	var returnValue int64
 
 	if !((i.rm >= 0 && i.rm <= 31) ||
 		(i.rd >= 0 && i.rd <= 31) ||
@@ -540,31 +541,31 @@ func (c Control) runInstruction(i Instruction) Control {
 
 		switch {
 		case i.op == "ORR":
-			c.registers[i.rd] = c.registers[i.rn] | c.registers[i.rm]
+			returnValue = c.registers[i.rn] | c.registers[i.rm]
 		case i.op == "AND":
-			c.registers[i.rd] = c.registers[i.rn] & c.registers[i.rm]
+			returnValue = c.registers[i.rn] & c.registers[i.rm]
 		case i.op == "ADD":
-			c.registers[i.rd] = c.registers[i.rn] + c.registers[i.rm]
+			returnValue = c.registers[i.rn] + c.registers[i.rm]
 		case i.op == "SUB":
-			c.registers[i.rd] = c.registers[i.rn] - c.registers[i.rm]
+			returnValue = c.registers[i.rn] - c.registers[i.rm]
 		case i.op == "EOR":
-			c.registers[i.rd] = c.registers[i.rn] ^ c.registers[i.rm]
+			returnValue = c.registers[i.rn] ^ c.registers[i.rm]
 		case i.op == "LSL":
-			c.registers[i.rd] = c.registers[i.rn] << i.shamt
+			returnValue = c.registers[i.rn] << i.shamt
 		case i.op == "LSR":
-			c.registers[i.rd] = c.registers[i.rn] >> i.shamt
+			returnValue = c.registers[i.rn] >> i.shamt
 		case i.op == "ASR":
 			var shift = 0
 
 			if c.registers[i.rm]%2 == 0 {
-				shift = 1
+				shift = shift + 1 // 1
 			}
 
-			c.registers[i.rd] = c.registers[i.rn] >> (16 * shift)
+			returnValue = c.registers[i.rn] >> (16 * shift)
 		case i.op == "MOVZ":
-			c.registers[i.rd] = int64(i.address) << (i.shamt * 16)
+			returnValue = int64(i.address) << (i.shamt * 16)
 		case i.op == "MOVK":
-			c.registers[i.rd] = int64(uint16(c.registers[i.rd])) ^ int64(i.address)<<(i.shamt*16)
+			returnValue = int64(uint16(c.registers[i.rd])) ^ int64(i.address)<<(i.shamt*16)
 		case i.op == "LDUR":
 			// fmt.Printf("Rd: %d\n Rm: %d\nValue: %d\nOffset:%d\n", i.rd, i.rm, c.registers[i.rm], i.offset)
 			var registerDestValue = c.registers[i.rn]
@@ -576,7 +577,7 @@ func (c Control) runInstruction(i Instruction) Control {
 
 			c.memoryData = memoryCheck(c.memoryData, int(memoryIndex))
 
-			c.registers[i.rd] = c.memoryData[memoryIndex]
+			returnValue = c.memoryData[memoryIndex]
 		case i.op == "STUR":
 			var registerDestValue = c.registers[i.rn]
 			var memoryIndex = int32(int32(registerDestValue+int64(i.address*4))-int32(c.memoryDataHead)) / 4
@@ -588,6 +589,8 @@ func (c Control) runInstruction(i Instruction) Control {
 			c.memoryData = memoryCheck(c.memoryData, int(memoryIndex))
 
 			c.memoryData[memoryIndex] = c.registers[i.rd]
+
+			return -1
 		case i.op == "B":
 			c.programCnt += int(i.offset * 4)
 			branchOperation = true
@@ -602,9 +605,9 @@ func (c Control) runInstruction(i Instruction) Control {
 				branchOperation = true
 			}
 		case i.op == "ADDI":
-			c.registers[i.rd] = int64(int32(c.registers[i.rn]) + i.im)
+			returnValue = int64(int32(c.registers[i.rn]) + i.im)
 		case i.op == "SUBI":
-			c.registers[i.rd] = int64(int32(c.registers[i.rn]) - i.im)
+			returnValue = int64(int32(c.registers[i.rn]) - i.im)
 		case i.op == "NOP":
 			break
 		}
@@ -620,15 +623,17 @@ func (c Control) runInstruction(i Instruction) Control {
 		c.programCnt -= 4
 	}
 
-	return c
+	return returnValue
 }
 
-func runSimulation(outputFile string, c Control, il []Instruction) Control {
+func runSimulation(outputFile string, c *Control, il []Instruction) {
 	outFile, errOut := os.Create(outputFile)
 	if errOut != nil {
 		log.Fatalf("Error opening output file. err: %s", errOut)
 	}
 
+	c.aluProcess(&bufPreALU)
+	c.memProcess(&bufPreMem)
 	c.writeBack(&bufPostMem, &bufPostALU)
 
 	var runControlLoop = true
@@ -645,7 +650,7 @@ func runSimulation(outputFile string, c Control, il []Instruction) Control {
 
 		var currentInstruction = il[listIndexFromPC]
 		var breakpoint = ((c.memoryDataHead - c.programCntStart) / 4) - 1
-		c = c.runInstruction(currentInstruction)
+		c.runInstruction(currentInstruction)
 
 		outputString = ""
 		concatString = "====================\n"
@@ -722,10 +727,8 @@ func runSimulation(outputFile string, c Control, il []Instruction) Control {
 
 	err := outFile.Close()
 	if err != nil {
-		return Control{}
+		fmt.Print("ERR") //return Control{}
 	}
-
-	return c
 }
 
 func memoryCheck(list []int64, index int) []int64 {
