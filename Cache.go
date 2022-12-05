@@ -50,33 +50,66 @@ type Cache struct {
 
 }
 
-func cacheAddressConversion(value uint) (uint, uint) {
-	var blockIndex = value & 0x0004
+func cacheAddressConversion(value uint) uint {
 	var setIndex = value & 0x0003
 
-	return blockIndex, setIndex
+	return setIndex
 }
 
-func (c Cache) checkCache(address uint) Block {
-	//var memoryAddress = strconv.FormatInt(int64(address), 2)
-	var blockIndex, setIndex = cacheAddressConversion(address)
-	var tag = (address & 0xFFF0) >> 3
-	var addressTemp uint
+func checkAlignment(address uint) int {
+	if address%8 == 0 {
+		return 0
+	} else {
+		return 1
+	}
+}
 
-	//cache hit
-	if c.CacheSets[setIndex][blockIndex].tag == tag {
-		return c.CacheSets[setIndex][blockIndex]
-	} else { //cache miss
-		//if aligned
-		if address%8 == 0 { // aligned good
-			addressTemp = address + 4
-			c.CacheSets[setIndex][blockIndex].word1 = int(addressTemp)
+//func readDisk()
+
+func (c *Control) cacheMiss(address uint, setIndex uint, inBlock int) {
+	var addressTemp uint
+	var cache = c.cache
+
+	if address%8 == 0 { // aligned good
+		addressTemp = address + 4
+		cache.CacheSets[setIndex][inBlock].word1 = int(address)
+		cache.CacheSets[setIndex][inBlock].word2 = int(addressTemp)
+	} else { //aligned not good
+		addressTemp = address - 4
+		cache.CacheSets[setIndex][inBlock].word1 = int(addressTemp)
+		cache.CacheSets[setIndex][inBlock].word2 = int(address)
+	}
+	cache.CacheSets[setIndex][inBlock].valid = 1
+}
+
+func (c *Control) checkCache(address uint) (Block, int) {
+	//var memoryAddress = strconv.FormatInt(int64(address), 2)
+	var cache = c.cache
+	var setIndex = cacheAddressConversion(address)
+	var tag = (address & 0xFFF0) >> 3
+	var i = 0
+	var inBlock = -1
+	var alignment = checkAlignment(address)
+
+	for i < 2 {
+		if cache.CacheSets[setIndex][i].tag == tag {
+			inBlock = i
+			break
 		}
-		if address%8 != 0 { //aligned not good
-			addressTemp = address - 4
-			//CacheSets[][].word2 = addressLocal
-		}
+		i += 1
 	}
 
-	return Block{}
+	//cache hit
+	if inBlock != -1 {
+		//if valid bit is valid
+		if cache.CacheSets[setIndex][inBlock].valid == 1 {
+			return cache.CacheSets[setIndex][inBlock], alignment
+		} else {
+			c.cacheMiss(address, setIndex, inBlock)
+		}
+	} else { //cache miss
+		c.cacheMiss(address, setIndex, inBlock)
+	}
+
+	return Block{}, -1
 }

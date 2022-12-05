@@ -20,5 +20,5 @@ func (c *Control) fetch() {
 
 	print(index)
 
-	c.cache.checkCache(uint(c.programCnt))
+	c.checkCache(uint(c.programCnt))
 }
