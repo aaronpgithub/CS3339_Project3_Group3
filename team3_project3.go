@@ -39,11 +39,11 @@ type Instruction struct {
 }
 
 type Control struct {
-	programCnt      int       //program counter for next instruction to run (stored value must be multiplied by 4)
-	registers       [32]int64 //array of 32 registers
-	memoryData      []int64   //data after break instruction
-	memoryDataHead  int       //program counter at start of memory data
-	programCntStart int       //
+	programCnt      int           //program counter for next instruction to run (stored value must be multiplied by 4)
+	registers       [32]int64     //array of 32 registers
+	memory          []interface{} //data of both memory and instruction
+	memoryDataHead  int           //program counter at start of memory data
+	programCntStart int           //start of program counter
 }
 
 var bufPreIssue = initQueue(4)
@@ -61,23 +61,31 @@ func main() {
 	instructionList, control := ReadFile(*iFlag)
 	control.programCntStart = 96
 	control.programCnt = 96
+	control.memory = instructionList
 
 	//parse data and write to output file
-	for i := range instructionList {
+	for i := range control.memory {
 
-		linevalue, err := strconv.ParseUint(instructionList[i].rawInstruction, 2, 32)
+		if control.programCnt+i*4 >= control.memoryDataHead {
+			break
+		}
+
+		var instruction = control.memory[i].(Instruction)
+
+		linevalue, err := strconv.ParseUint(instruction.rawInstruction, 2, 32)
 		if err != nil {
 			fmt.Println(err)
 		}
-		if !(len(instructionList[i].op) > 0) {
-			instructionList[i].linevalue = linevalue
-			instructionList[i].opcode, instructionList[i].op, instructionList[i].typeofInstruction = binToDec(instructionList[i].linevalue)
-			instructionList[i] = parse(instructionList[i])
-			readRegister(&instructionList[i])
+		if !(len(instruction.op) > 0) {
+			instruction.linevalue = linevalue
+			instruction.opcode, instruction.op, instruction.typeofInstruction = binToDec(instruction.linevalue)
+			instruction = parse(instruction)
+			readRegister(&instruction)
+			control.memory[i] = instruction
 		}
 	}
 
-	writeOutputFile(oFlag, instructionList)
+	writeOutputFile(oFlag, instructionList, control.memoryDataHead, control.programCntStart)
 
 	runSimulation(oSim, &control, instructionList)
 }
@@ -93,7 +101,7 @@ func main() {
 // Returns:
 //
 //	-Array of structs (dtype Instruction)
-func ReadFile(fileName string) ([]Instruction, Control) {
+func ReadFile(fileName string) ([]interface{}, Control) {
 
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -101,7 +109,7 @@ func ReadFile(fileName string) ([]Instruction, Control) {
 	}
 	defer file.Close()
 
-	var instructions []Instruction
+	var instructions []interface{}
 	control := Control{}
 	scanner := bufio.NewScanner(file)
 	data := false
@@ -142,12 +150,6 @@ func ReadFile(fileName string) ([]Instruction, Control) {
 						op:                fmt.Sprintf("%d", temp),
 					}
 				}
-				//get value to store in memory data
-				opval, err := strconv.Atoi(newInstruct.op)
-				if err != nil {
-					fmt.Println(err)
-				}
-				control.memoryData = append(control.memoryData, int64(opval))
 
 				//set memory head at first memory collection
 				if d == -1 {
@@ -280,7 +282,7 @@ func parseFlags() (oFlag *string, iFlag *string) {
 	return oFlag, iFlag
 }
 
-func writeOutputFile(oFlag *string, instructionList []Instruction) {
+func writeOutputFile(oFlag *string, instructionList []interface{}, memoryDataStart int, programCountStart int) {
 	//open output file
 	outFile, errOut := os.Create(*oFlag + "_dis.txt")
 	if errOut != nil {
@@ -291,15 +293,17 @@ func writeOutputFile(oFlag *string, instructionList []Instruction) {
 	//string concatenation for printing to output file
 
 	for i := range instructionList {
+
 		var outputString string
 		var concatString string
-		concatString = fmt.Sprintf("%s\t", instructionList[i].instructionParsed)
+		var object = instructionList[i].(Instruction)
+		concatString = fmt.Sprintf("%s\t", object.instructionParsed)
 		outputString += concatString
-		concatString = fmt.Sprintf("%s\t", strconv.Itoa(instructionList[i].programCnt))
+		concatString = fmt.Sprintf("%s\t", strconv.Itoa(object.programCnt))
 		outputString += concatString
-		concatString = fmt.Sprintf("%s\t", instructionList[i].op)
+		concatString = fmt.Sprintf("%s\t", object.op)
 		outputString += concatString
-		concatString = fmt.Sprintf("%s\n", instructionList[i].registers)
+		concatString = fmt.Sprintf("%s\n", object.registers)
 		outputString += concatString
 
 		if _, err2 := outFile.Write([]byte(outputString)); err2 != nil {
@@ -575,9 +579,9 @@ func (c *Control) runInstruction(i Instruction) int64 {
 				break
 			}
 
-			c.memoryData = memoryCheck(c.memoryData, int(memoryIndex))
+			c.memory = memoryCheck(c.memory, int(memoryIndex))
 
-			returnValue = c.memoryData[memoryIndex]
+			returnValue = c.memory[memoryIndex].(int64)
 		case i.op == "STUR":
 			var registerDestValue = c.registers[i.rn]
 			var memoryIndex = int32(int32(registerDestValue+int64(i.address*4))-int32(c.memoryDataHead)) / 4
@@ -586,9 +590,9 @@ func (c *Control) runInstruction(i Instruction) int64 {
 				break
 			}
 
-			c.memoryData = memoryCheck(c.memoryData, int(memoryIndex))
+			c.memory = memoryCheck(c.memory, int(memoryIndex))
 
-			c.memoryData[memoryIndex] = c.registers[i.rd]
+			c.memory[memoryIndex] = c.registers[i.rd]
 
 			return -1
 		case i.op == "B":
@@ -626,7 +630,7 @@ func (c *Control) runInstruction(i Instruction) int64 {
 	return returnValue
 }
 
-func runSimulation(outputFile string, c *Control, il []Instruction) {
+func runSimulation(outputFile string, c *Control, il []interface{}) {
 	outFile, errOut := os.Create(outputFile)
 	if errOut != nil {
 		log.Fatalf("Error opening output file. err: %s", errOut)
@@ -648,7 +652,7 @@ func runSimulation(outputFile string, c *Control, il []Instruction) {
 			listIndexFromPC = 0
 		}
 
-		var currentInstruction = il[listIndexFromPC]
+		var currentInstruction = il[listIndexFromPC].(Instruction)
 		var breakpoint = ((c.memoryDataHead - c.programCntStart) / 4) - 1
 		c.runInstruction(currentInstruction)
 
@@ -663,7 +667,7 @@ func runSimulation(outputFile string, c *Control, il []Instruction) {
 		var runLoop = true
 		var iterator = 0
 		var registerMax = 32
-		var dataMax = len(c.memoryData)
+		var dataMax = len(c.memory)
 
 		for runLoop {
 			if iterator >= registerMax {
@@ -681,18 +685,18 @@ func runSimulation(outputFile string, c *Control, il []Instruction) {
 			}
 		}
 
-		if c.memoryData != nil {
+		if len(c.memory)-c.memoryDataHead/4 != 0 {
 			concatString = fmt.Sprintf("\n\ndata:\n%d\t", c.memoryDataHead)
 			outputString += concatString
 
 			runLoop = true
-			iterator = 0
+			iterator = c.memoryDataHead / 4
 
 			for runLoop {
 				if iterator >= dataMax {
 					runLoop = false
 				} else {
-					concatString = fmt.Sprintf("%d\t", c.memoryData[iterator])
+					concatString = fmt.Sprintf("%d\t", c.memory[iterator])
 					outputString += concatString
 
 					if (iterator+1)%8 == 0 {
@@ -731,7 +735,7 @@ func runSimulation(outputFile string, c *Control, il []Instruction) {
 	}
 }
 
-func memoryCheck(list []int64, index int) []int64 {
+func memoryCheck(list []interface{}, index int) []interface{} {
 	for len(list) <= index {
 		list = append(list, 0)
 	}

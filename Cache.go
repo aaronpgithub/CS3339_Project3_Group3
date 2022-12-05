@@ -1,5 +1,6 @@
 package main
 
+/*
 func Cache() {
 	type Block struct {
 		valid int
@@ -11,23 +12,24 @@ func Cache() {
 
 	var address1, address2, dataWord, addressLocal int
 
-	var Set = [2]Block{
-		Block{
-			valid: 0,
-			dirty: 0,
-			tag:   0,
-			word1: 0,
-			word2: 0,
-		},
-		Block{
-			valid: 1,
-			dirty: 1,
-			tag:   1,
-			word1: 2,
-			word2: 1,
-		},
-	}
-
+	/*
+		var Set = [2]Block{
+			Block{
+				valid: 0,
+				dirty: 0,
+				tag:   0,
+				word1: 0,
+				word2: 0,
+			},
+			Block{
+				valid: 1,
+				dirty: 1,
+				tag:   1,
+				word1: 2,
+				word2: 1,
+			},
+		}*/
+/*
 	var CacheSets [4][2]Block
 	var JustMissedList []int
 	var LruBits = [4]int{0, 0, 0, 0}
@@ -47,3 +49,6 @@ func Cache() {
 	}
 
 }
+
+func checkCache()
+*/

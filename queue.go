@@ -49,3 +49,11 @@ func (q *Queue) isEmpty() bool {
 		return false
 	}
 }
+
+func (q Queue) head() ([]interface{}, int) {
+	if q.isEmpty() {
+		return nil, -1
+	} else {
+		return q.data[0], 0
+	}
+}
