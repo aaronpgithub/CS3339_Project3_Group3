@@ -78,4 +78,5 @@ func (c Cache) checkCache(address uint) Block {
 		}
 	}
 
+	return Block{}
 }
