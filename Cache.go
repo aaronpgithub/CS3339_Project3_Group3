@@ -1,6 +1,6 @@
 package main
 
-func Cache() {
+func CheckCache() {
 	type Block struct {
 		valid int
 		dirty int
@@ -9,7 +9,7 @@ func Cache() {
 		word2 int
 	}
 
-	var address1, address2, dataWord, addressLocal int
+	var address1, address2, dataWord, addressLocal int32
 
 	var Set = [2]Block{
 		Block{
@@ -44,6 +44,19 @@ func Cache() {
 		address1 = addressLocal - 4
 		address2 = addressLocal
 		//CacheSets[][].word2 = addressLocal
+		// 
 	}
+
+}
+
+func Flush(c Control) {
+	//Writes out all dirty blocks to memory at the conclusion of execution
+	if CacheSets[][].dirty == 1 {
+		c.memoryData[] = CacheSets[][]. 
+	}
+
+}
+
+func DataMemManagement() {
 
 }

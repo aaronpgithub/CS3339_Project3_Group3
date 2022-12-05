@@ -12,8 +12,12 @@ func fetch() {
 	// Branch, BREAK, and NOP instructions will all be fetched,
 	// but will not be written into the Pre-Issue Buffer
 
-	/*if typeofInstruction == "B" || cacheHit == true {
+	/*if typeofInstruction == "B" || cacheHit == false {
 		fetch is stalled
 	} */
-
+	/*
+		if typeofInstruction == "BREAK" {
+			no more instructions
+		}
+	*/
 }
