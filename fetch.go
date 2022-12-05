@@ -1,6 +1,6 @@
 package main
 
-func fetch() {
+func (c *Control) fetch() {
 	// can fetch and decode 2 instructions per clock cycle
 	// check if fetch is stalled bc branch/cache miss
 	// check if instruction in cache
@@ -16,4 +16,9 @@ func fetch() {
 		fetch is stalled
 	} */
 
+	var index = (c.programCnt - c.programCntStart) / 4 //1, 2, 3, 4...
+
+	print(index)
+
+	c.cache.checkCache(uint(c.programCnt))
 }

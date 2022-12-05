@@ -44,6 +44,7 @@ type Control struct {
 	memory          []interface{} //data of both memory and instruction
 	memoryDataHead  int           //program counter at start of memory data
 	programCntStart int           //start of program counter
+	cache           Cache         //cache storage
 }
 
 var bufPreIssue = initQueue(4)
@@ -636,6 +637,7 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 		log.Fatalf("Error opening output file. err: %s", errOut)
 	}
 
+	c.fetch()
 	c.aluProcess(&bufPreALU)
 	c.memProcess(&bufPreMem)
 	c.writeBack(&bufPostMem, &bufPostALU)
