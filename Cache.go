@@ -4,8 +4,8 @@ type Block struct {
 	valid int
 	dirty int
 	tag   uint
-	word1 int
-	word2 int
+	word1 interface{}
+	word2 interface{}
 }
 
 type Cache struct {
@@ -64,27 +64,45 @@ func checkAlignment(address uint) int {
 	}
 }
 
-//func readDisk()
+func (c *Control) readDisk(address uint) interface{} {
+	var valueAdr1 interface{}
+	var addressToIndex = (address - uint(c.programCntStart)) / 4
 
-func (c *Control) cacheMiss(address uint, setIndex uint, inBlock int) {
+	valueAdr1 = c.memory[addressToIndex]
+
+	return valueAdr1
+}
+
+func (c *Control) cacheMiss(address uint, setIndex uint, inBlock int, alignment int, tag uint) {
 	var addressTemp uint
-	var cache = c.cache
+	var cache = &c.cache
+	var value1, value2 interface{}
 
-	if address%8 == 0 { // aligned good
+	if alignment == 0 { // aligned good
 		addressTemp = address + 4
-		cache.CacheSets[setIndex][inBlock].word1 = int(address)
-		cache.CacheSets[setIndex][inBlock].word2 = int(addressTemp)
+		value1 = c.readDisk(address)
+		value2 = c.readDisk(addressTemp)
 	} else { //aligned not good
 		addressTemp = address - 4
-		cache.CacheSets[setIndex][inBlock].word1 = int(addressTemp)
-		cache.CacheSets[setIndex][inBlock].word2 = int(address)
+		value1 = c.readDisk(addressTemp)
+		value2 = c.readDisk(address)
 	}
+
+	if inBlock == 1 {
+		cache.LruBits[setIndex] = 0
+	} else {
+		cache.LruBits[setIndex] = 1
+	}
+
+	cache.CacheSets[setIndex][inBlock].word1 = value1
+	cache.CacheSets[setIndex][inBlock].word2 = value2
+	cache.CacheSets[setIndex][inBlock].tag = tag
 	cache.CacheSets[setIndex][inBlock].valid = 1
 }
 
 func (c *Control) checkCache(address uint) (Block, int) {
 	//var memoryAddress = strconv.FormatInt(int64(address), 2)
-	var cache = c.cache
+	var cache = &c.cache
 	var setIndex = cacheAddressConversion(address)
 	var tag = (address & 0xFFF0) >> 3
 	var i = 0
@@ -105,10 +123,10 @@ func (c *Control) checkCache(address uint) (Block, int) {
 		if cache.CacheSets[setIndex][inBlock].valid == 1 {
 			return cache.CacheSets[setIndex][inBlock], alignment
 		} else {
-			c.cacheMiss(address, setIndex, inBlock)
+			c.cacheMiss(address, setIndex, cache.LruBits[setIndex], alignment, tag)
 		}
 	} else { //cache miss
-		c.cacheMiss(address, setIndex, inBlock)
+		c.cacheMiss(address, setIndex, cache.LruBits[setIndex], alignment, tag)
 	}
 
 	return Block{}, -1

@@ -36,15 +36,18 @@ type Instruction struct {
 	arg1Str           string
 	arg2Str           string
 	arg3Str           string
+	rawValue          int64
 }
 
 type Control struct {
-	programCnt      int           //program counter for next instruction to run (stored value must be multiplied by 4)
-	registers       [32]int64     //array of 32 registers
-	memory          []interface{} //data of both memory and instruction
-	memoryDataHead  int           //program counter at start of memory data
-	programCntStart int           //start of program counter
-	cache           Cache         //cache storage
+	programCnt       int           //program counter for next instruction to run (stored value must be multiplied by 4)
+	registers        [32]int64     //array of 32 registers
+	memory           []interface{} //data of both memory and instruction
+	memoryDataHead   int           //program counter at start of memory data
+	registerLocTable [][]int
+	programCntStart  int   //start of program counter
+	cache            Cache //cache storage
+	fetchPaused      bool
 }
 
 var bufPreIssue = initQueue(4)
@@ -63,6 +66,7 @@ func main() {
 	control.programCntStart = 96
 	control.programCnt = 96
 	control.memory = instructionList
+	control.fetchPaused = false
 
 	//parse data and write to output file
 	for i := range control.memory {
@@ -152,6 +156,8 @@ func ReadFile(fileName string) ([]interface{}, Control) {
 					}
 				}
 
+				newInstruct.rawValue = parse2CBinary(instruc)
+
 				//set memory head at first memory collection
 				if d == -1 {
 					control.memoryDataHead = newInstruct.programCnt
@@ -159,7 +165,6 @@ func ReadFile(fileName string) ([]interface{}, Control) {
 
 				instructions = append(instructions, newInstruct)
 				d--
-
 			}
 		} else {
 			newInstruct := Instruction{
@@ -637,11 +642,6 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 		log.Fatalf("Error opening output file. err: %s", errOut)
 	}
 
-	c.fetch()
-	c.aluProcess(&bufPreALU)
-	c.memProcess(&bufPreMem)
-	c.writeBack(&bufPostMem, &bufPostALU)
-
 	var runControlLoop = true
 	var outputString, concatString string
 	var cycleNumber = 1
@@ -649,14 +649,19 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 	for runControlLoop {
 		var programCountPrevious = c.programCnt
 		var listIndexFromPC = (c.programCnt - c.programCntStart) / 4
+		var breakpoint = ((c.memoryDataHead - c.programCntStart) / 4) - 1
 
 		if listIndexFromPC < 0 {
 			listIndexFromPC = 0
 		}
 
 		var currentInstruction = il[listIndexFromPC].(Instruction)
-		var breakpoint = ((c.memoryDataHead - c.programCntStart) / 4) - 1
-		c.runInstruction(currentInstruction)
+
+		c.writeBack(&bufPostMem, &bufPostALU)
+		c.memProcess(&bufPreMem)
+		c.aluProcess(&bufPreALU)
+		c.issueProcess(&bufPreIssue)
+		c.fetch(&bufPreIssue)
 
 		outputString = ""
 		concatString = "====================\n"
@@ -666,6 +671,7 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 		concatString = fmt.Sprintf("%s\t%s\n\nregisters:\nr00\t", currentInstruction.op, currentInstruction.registers)
 		outputString += concatString
 
+		//write registers and data
 		var runLoop = true
 		var iterator = 0
 		var registerMax = 32
@@ -687,18 +693,20 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 			}
 		}
 
-		if len(c.memory)-c.memoryDataHead/4 != 0 {
+		iterator = (c.memoryDataHead - c.programCntStart) / 4
+
+		//if there's data in memory to print
+		if len(c.memory)-iterator > 0 {
 			concatString = fmt.Sprintf("\n\ndata:\n%d\t", c.memoryDataHead)
 			outputString += concatString
 
 			runLoop = true
-			iterator = c.memoryDataHead / 4
 
 			for runLoop {
 				if iterator >= dataMax {
 					runLoop = false
 				} else {
-					concatString = fmt.Sprintf("%d\t", c.memory[iterator])
+					concatString = fmt.Sprintf("%d\t", c.memory[iterator].(Instruction).rawValue)
 					outputString += concatString
 
 					if (iterator+1)%8 == 0 {
@@ -722,8 +730,6 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 		}
 
 		cycleNumber++
-
-		c.programCnt += 4
 
 		if listIndexFromPC >= breakpoint {
 			runControlLoop = false

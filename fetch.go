@@ -1,8 +1,8 @@
 package main
 
-func (c *Control) fetch() {
+func (c *Control) fetch(bufPreIssue *Queue) {
 	// can fetch and decode 2 instructions per clock cycle
-	// check if fetch is stalled bc branch/cache miss
+	// check if fetch is stalled bc  branch/cache miss
 	// check if instruction in cache
 	// if instruction not in cache then grab from memory and it will be the instruction in cache
 	// for the next cycle
@@ -16,9 +16,26 @@ func (c *Control) fetch() {
 		fetch is stalled
 	} */
 
-	var index = (c.programCnt - c.programCntStart) / 4 //1, 2, 3, 4...
+	//var index = (c.programCnt - c.programCntStart) / 4 //1, 2, 3, 4...
+	var cacheBlock, alignment = c.checkCache(uint(c.programCnt))
+	var instruction []interface{}
 
-	print(index)
+	//cache found value
+	if alignment != -1 {
+		if !c.fetchPaused { //if fetch operation is ready
+			if alignment == 0 { //in word 1
+				instruction = append(instruction, cacheBlock.word1)
+			} else { //in word 2
+				instruction = append(instruction, cacheBlock.word2)
+			}
+		}
 
-	c.checkCache(uint(c.programCnt))
+		if cap(bufPreIssue.data) < bufPreIssue.maxSize {
+			if instruction[0].(Instruction).op != "B" {
+				bufPreIssue.enqueue(instruction)
+			}
+		}
+
+		c.programCnt += 4
+	}
 }

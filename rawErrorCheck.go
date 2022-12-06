@@ -10,13 +10,9 @@ Store instructions must be issued in order
 make a table in control that stores all registers being modified,
 */
 
-type RegisterTable struct {
-	registerLocTable [][]int
-}
-
 // findErrors finds if a register that is currently being modified is
-func (rt RegisterTable) findErrors(registerIndex int) bool {
-	if contains(rt.registerLocTable, registerIndex) {
+func (c *Control) findErrors(registerIndex int) bool {
+	if contains(c.registerLocTable, registerIndex) {
 		return true
 	} else {
 		return false
