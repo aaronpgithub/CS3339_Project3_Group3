@@ -601,7 +601,7 @@ func (c *Control) runInstruction(i Instruction) int64 {
 			c.memory[memoryIndex] = c.registers[i.rd]
 
 			return -1
-		case i.op == "B":
+		case i.op == "B": //might be obsolete
 			c.programCnt += int(i.offset * 4)
 			branchOperation = true
 		case i.op == "CBZ":
@@ -660,7 +660,7 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 		c.writeBack(&bufPostMem, &bufPostALU)
 		c.memProcess(&bufPreMem)
 		c.aluProcess(&bufPreALU)
-		c.issueProcess(&bufPreIssue)
+		c.issueProcess(&bufPreIssue, &bufPreMem, &bufPreALU)
 		c.fetch(&bufPreIssue)
 
 		outputString = ""
