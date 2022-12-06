@@ -1,22 +1,420 @@
 ====================
-cycle:1	96	ADDI	R0, R0, #272
+cycle:1	96 - ADDI	R0, R0, #272
+Pre-Issue Buffer:
+EMPTY
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
 
 registers:
 r00	0	0	0	0	0	0	0	0	
 r08	0	0	0	0	0	0	0	0	
 r16	0	0	0	0	0	0	0	0	
 r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
 
 data:
 264	-2147483648	2147483647	
 ====================
-cycle:2	96	ADDI	R0, R0, #272
+cycle:2	96 - ADDI	R0, R0, #272
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
 
 registers:
 r00	0	0	0	0	0	0	0	0	
 r08	0	0	0	0	0	0	0	0	
 r16	0	0	0	0	0	0	0	0	
 r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:3	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]
+Pre-ALU Buffer:
+	Entry 0:	[96 , ADDI]
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:4	104 - ADDI	R1, R2, #400
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:5	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:6	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:7	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:8	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:9	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:10	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:11	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
+
+data:
+264	-2147483648	2147483647	
+====================
+cycle:12	100 - ADDI	R2, R1, #248
+Pre-Issue Buffer:
+	Entry 0:	[96 , ADDI]	Entry 1:	[100 , ADDI]	Entry 2:	[96 , ADDI]
+Pre-ALU Buffer:
+EMPTY
+Post-ALU Buffer:
+EMPTY
+Pre-MEM Buffer:
+EMPTY
+Post-MEM Buffer:
+EMPTY
+
+registers:
+r00	0	0	0	0	0	0	0	0	
+r08	0	0	0	0	0	0	0	0	
+r16	0	0	0	0	0	0	0	0	
+r24	0	0	0	0	0	0	0	0	
+Cache   [(valid bit, dirty bit, int(tag))<word0,word1>]
+Set 0: LRU=1
+	Entry 0: [(1, 0, 12)<96,100>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+Set 0: LRU=1
+	Entry 0: [(0, 0, 0)<EMPTY,EMPTY>]
+	Entry 1: [(0, 0, 0)<EMPTY,EMPTY>]
+
 
 data:
 264	-2147483648	2147483647	

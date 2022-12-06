@@ -1,11 +1,6 @@
 package main
 
-import "fmt"
-
 func (c *Control) issueProcess(bufPreIssue *Queue, bufPreMem *Queue, bufPreALU *Queue) {
-	for _, i := range bufPreIssue.data {
-		fmt.Print(i)
-	}
 	/*
 		It can issue up to two instructions, out of order, per clock cycle.  When an instruction is issued,
 		it moves out of the pre-issue buffer and into either the pre-mem buffer or the pre-ALU buffer.
@@ -51,14 +46,28 @@ func (c *Control) issueProcess(bufPreIssue *Queue, bufPreMem *Queue, bufPreALU *
 			if cap(bufPreALU.data) < bufPreALU.maxSize {
 				switch instruction.typeofInstruction {
 				case "R":
-					errorsExist = c.findErrors(int(instruction.rn)) || c.findErrors(int(instruction.rd))
-					registerPipelineAdd = append(registerPipelineAdd, []int{int(instruction.rn), 0})
+					errorsExist = c.findErrors(int(instruction.rn)) || c.findErrors(int(instruction.rm))
 					registerPipelineAdd = append(registerPipelineAdd, []int{int(instruction.rd), 0})
 					break
 				case "I":
 					errorsExist = c.findErrors(int(instruction.rn))
-					errorsExist = c.findErrors(int(instruction.rn)) || errorsExist
+					registerPipelineAdd = append(registerPipelineAdd, []int{int(instruction.rd), 0})
 					break
+				case "CB":
+					errorsExist = c.findErrors(int(instruction.conditional))
+					break
+				case "IM":
+					registerPipelineAdd = append(registerPipelineAdd, []int{int(instruction.rd), 0})
+					break
+				}
+			}
+
+			//if no raw hazards exist,
+			if !errorsExist {
+				bufPreALU.enqueue(value)
+
+				for _, i := range registerPipelineAdd {
+					c.registerLocTable = append(c.registerLocTable, i)
 				}
 			}
 		}

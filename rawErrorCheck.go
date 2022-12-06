@@ -19,6 +19,19 @@ func (c *Control) findErrors(registerIndex int) bool {
 	}
 }
 
+// findErrors finds if a register that is currently being modified is
+func (c *Control) removeError(registerIndex int) {
+	var i = 0
+	for _, v := range c.registerLocTable {
+		if v[0] == registerIndex {
+			v = c.registerLocTable[0]
+			c.registerLocTable[i] = v
+			c.registerLocTable = c.registerLocTable[:len(c.registerLocTable)-1]
+		}
+		i += 1
+	}
+}
+
 func contains(slice [][]int, value int) bool {
 	for _, v := range slice {
 		if v[0] == value {

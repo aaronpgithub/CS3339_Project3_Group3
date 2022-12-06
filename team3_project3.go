@@ -666,17 +666,103 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 		outputString = ""
 		concatString = "====================\n"
 		outputString += concatString
-		concatString = fmt.Sprintf("cycle:%d\t%s\t", cycleNumber, strconv.Itoa(programCountPrevious))
+		concatString = fmt.Sprintf("cycle:%d\t%s - %s\t%s\n", cycleNumber, strconv.Itoa(programCountPrevious),
+			currentInstruction.op, currentInstruction.registers)
 		outputString += concatString
-		concatString = fmt.Sprintf("%s\t%s\n\nregisters:\nr00\t", currentInstruction.op, currentInstruction.registers)
+		concatString = fmt.Sprintf("Pre-Issue Buffer:\n")
 		outputString += concatString
+
+		var entryAmt = 0
+
+		if !bufPreIssue.isEmpty() {
+			for _, bufInstr := range bufPreIssue.data {
+				var inst = bufInstr[0].(Instruction)
+				concatString = fmt.Sprintf("\tEntry %d:\t[%d , %s]", entryAmt, inst.programCnt, inst.op)
+				outputString += concatString
+				entryAmt += 1
+			}
+		} else {
+			concatString = fmt.Sprintf("EMPTY")
+			outputString += concatString
+		}
+
+		concatString = fmt.Sprintf("\nPre-ALU Buffer:\n")
+		outputString += concatString
+
+		entryAmt = 0
+
+		if !bufPreALU.isEmpty() {
+			for _, bufInstr := range bufPreALU.data {
+				var inst = bufInstr[0].(Instruction)
+				concatString = fmt.Sprintf("\tEntry %d:\t[%d , %s]", entryAmt, inst.programCnt, inst.op)
+				outputString += concatString
+				entryAmt += 1
+			}
+		} else {
+			concatString = fmt.Sprintf("EMPTY")
+			outputString += concatString
+		}
+
+		concatString = fmt.Sprintf("\nPost-ALU Buffer:\n")
+		outputString += concatString
+
+		entryAmt = 0
+
+		if !bufPostALU.isEmpty() {
+			for _, bufInstr := range bufPostALU.data {
+				var inst = bufInstr[0].(Instruction)
+				concatString = fmt.Sprintf("\tEntry %d:\t[%d , %s]", entryAmt, inst.programCnt, inst.op)
+				outputString += concatString
+				entryAmt += 1
+			}
+		} else {
+			concatString = fmt.Sprintf("EMPTY")
+			outputString += concatString
+		}
+
+		concatString = fmt.Sprintf("\nPre-MEM Buffer:\n")
+		outputString += concatString
+
+		entryAmt = 0
+
+		if !bufPreMem.isEmpty() {
+			for _, bufInstr := range bufPreMem.data {
+				var inst = bufInstr[0].(Instruction)
+				concatString = fmt.Sprintf("\tEntry %d:\t[%d , %s]", entryAmt, inst.programCnt, inst.op)
+				outputString += concatString
+				entryAmt += 1
+			}
+		} else {
+			concatString = fmt.Sprintf("EMPTY")
+			outputString += concatString
+		}
+
+		concatString = fmt.Sprintf("\nPost-MEM Buffer:\n")
+		outputString += concatString
+
+		entryAmt = 0
+
+		if !bufPostMem.isEmpty() {
+			for _, bufInstr := range bufPostMem.data {
+				var inst = bufInstr[0].(Instruction)
+				concatString = fmt.Sprintf("\tEntry %d:\t[%d , %s]", entryAmt, inst.programCnt, inst.op)
+				outputString += concatString
+				entryAmt += 1
+			}
+		} else {
+			concatString = fmt.Sprintf("EMPTY")
+			outputString += concatString
+		}
 
 		//write registers and data
 		var runLoop = true
 		var iterator = 0
 		var registerMax = 32
 		var dataMax = len(c.memory)
+		concatString = fmt.Sprintf("\n\nregisters:\nr00\t")
+		outputString += concatString
 
+		//write registers
 		for runLoop {
 			if iterator >= registerMax {
 				runLoop = false
@@ -690,6 +776,33 @@ func runSimulation(outputFile string, c *Control, il []interface{}) {
 				}
 
 				iterator++
+			}
+		}
+
+		//write cache
+		entryAmt = 0
+		concatString = fmt.Sprintf("\nCache   [(valid bit, dirty bit, int(tag))<word0,word1>]\n")
+		outputString += concatString
+
+		for _, j := range c.cache.CacheSets {
+			var entryIterator = 0
+			concatString = fmt.Sprintf("Set %d: LRU=%d\n", entryAmt, c.cache.LruBits[entryAmt])
+			outputString += concatString
+
+			for _, r := range j {
+				var word1String = "EMPTY"
+				var word2String = "EMPTY"
+				if r.word1 != nil {
+					word1String = strconv.Itoa(r.word1.(Instruction).programCnt)
+				}
+				if r.word2 != nil {
+					word2String = strconv.Itoa(r.word2.(Instruction).programCnt)
+				}
+
+				concatString = fmt.Sprintf("\tEntry %d: [(%d, %d, %d)<%s,%s>]\n", entryIterator, r.valid, r.dirty,
+					r.tag, word1String, word2String)
+				outputString += concatString
+				entryIterator += 1
 			}
 		}
 
